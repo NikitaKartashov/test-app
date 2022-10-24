@@ -13,7 +13,19 @@ const {
   NONCE,
 } = process.env;
 
+
 router.get('/', (req, res) => {
+  // check if no req.query.shop then res.redirect('/login');
+  // else find foundShop = await Shop.findOne({ shopDomain: shop })
+  // use accessToken
+  // do 3 request
+  // Hint how to fetch resource - count products (const productsResponse = await axios.get(`https://${foundShop.shopDomain}/admin/products/count.json`, { headers: { 'x-shopify-access-token': foundShop.accessToken }  }))
+  // - count orders
+  // - count customers
+  // res.render('page', { productsCount: productsResponse.data.count, ordersCount: ordersResponse.data.count  })
+});
+
+router.get('/login', (req, res) => {
   res.render('loginPage', {
     header: 'Welcome',
   });
@@ -27,44 +39,28 @@ router.post('/oauth/shopify', async (req, res) => {
 
 router.get('/oauth/shopify/callback', async (req, res) => {
   const { code } = req.query;
-  const { hmac } = req.query;
   const { shop } = req.query;
   const url = `https://${req.query.shop}/admin/oauth/access_token?client_id=${SHOPIFY_API_KEY}&client_secret=${SHOPIFY_API_SECRET_KEY}&code=${code}`;
   const response = await axios.post(url);
-  const findShop = await Shop.findOne({ shop });
-  if (findShop) {
-    Shop.accessToken = response.data.access_token;
+
+  const foundShop = await Shop.findOne({ shop });
+
+  if (foundShop) {
+    foundShop.accessToken = response.data.access_token;
+    await foundShop.save();
+    // await Shop.updateOne({ _id: foundShop._id }, { accessToken: response.data.access_token }});
+
   } else {
-    const newShop = await new Shop({
+    const newShop = new Shop({
       shopDomain: req.query.shop,
       accessToken: response.data.access_token,
     });
+
     await newShop.save();
   }
-  res.render('storePage', {
-    header: `Welcome, ${BRAND_NAME}`,
-  });
+  //
+  res.redirect('/?shop' + shop);
 });
 
-router.get('/admin/api/2022-10/customers/count.json', async (req, res) => {
-  const { shop } = req.query;
-  const responce = await Shop.findOne({ shop });
-  const token = responce.accessToken;
-  // res.json({ token });
-  if (token) {
-    // const countCustomers = await axios.get(
-    //   `https://${req.query.shop}/admin/api/2022-10/customers/count.json?access_token=${token}`
-    // );
-    // res.json(countCustomers);
-    res.redirect(
-      `https://${responce.shopDomain}/admin/api/2022-10/customers/count.json`
-    );
-  }
-});
-router.get('/productsPage', (req, res) => {
-  res.render('productsPage', {
-    header: 'Our products',
-  });
-});
 
 module.exports = router;
