@@ -59,7 +59,7 @@ router.get('/oauth/shopify/callback', async (req, res) => {
     await newShop.save();
   }
   //
-  res.redirect('/?shop' + shop);
+  res.redirect('/?shop=' + shop);
 });
 
 
