@@ -34,7 +34,7 @@ router.get('/login', (req, res) => {
 router.post('/oauth/shopify', async (req, res) => {
   const { shopDomain } = req.body;
   const url = `https://${shopDomain}/admin/oauth/authorize?client_id=${SHOPIFY_API_KEY}&scope=${SHOPIFY_SCOPES}&redirect_uri=${SHOPIFY_REDIRECT_URI}&state=${NONCE}`;
-  await res.redirect(url);
+  res.redirect(url);
 });
 
 router.get('/oauth/shopify/callback', async (req, res) => {
@@ -43,7 +43,7 @@ router.get('/oauth/shopify/callback', async (req, res) => {
   const url = `https://${req.query.shop}/admin/oauth/access_token?client_id=${SHOPIFY_API_KEY}&client_secret=${SHOPIFY_API_SECRET_KEY}&code=${code}`;
   const response = await axios.post(url);
 
-  const foundShop = await Shop.findOne({ shop });
+  const foundShop = await Shop.findOne({ shopDomain: shop });
 
   if (foundShop) {
     foundShop.accessToken = response.data.access_token;
