@@ -2,7 +2,6 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const exphbs = require('express-handlebars');
-// const { Shopify } = require("@shopify/shopify-api");
 const path = require('path');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -27,7 +26,7 @@ app.use(mainRoutes);
 async function start() {
   try {
     await mongoose.connect(
-      'mongodb+srv://Nikita:q1w2e3r4t5@cluster0.2saaolr.mongodb.net/shop',
+      'mongodb+srv://Nikita:1q2w3e4r5t@cluster0.079drc2.mongodb.net/shop',
       {}
     );
     app.listen(PORT, () => {
